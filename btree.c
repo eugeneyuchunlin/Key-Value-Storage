@@ -1,6 +1,7 @@
-#include <AvailabilityInternal.h>
 #include <stdlib.h>
 #include <sys/signal.h>
+#include <assert.h>
+#include "bloom_filter.h"
 #include "btree.h"
 
 NODE * createNode(){
@@ -11,39 +12,53 @@ NODE * createNode(){
 	return node;
 }
 
-B_tree * createTree(){
+B_tree * createTree(unsigned int MAX_SIZE){
 	B_tree* tree = (B_tree *)malloc(sizeof(B_tree));
 	tree->root = createNode();
 	tree->size = 0;
+	tree->max_size = MAX_SIZE;
+	MAX_SIZE = MAX_SIZE >> 3;
+	tree->bitArray = (unsigned int*)malloc(sizeof(unsigned int)*MAX_SIZE);
 	return tree;
 }
 
-Level * createLevel(unsigned int max, Data ** start){
-	Level * level = (Level *)malloc(sizeof(Level));
-	level->datas = start;
-	level->index = 0;
-	level->max = max;
-	return level;
-}
 
-void insertNode(
+Data * getData(
 		B_tree * tree,
 		Data * data
 ){
+	NODE * foundNode = searchNode(tree->root, data);
+	
+	if(!foundNode->l_empty && foundNode->l_data->key == data->key){
+		data->value = foundNode->l_data->value;
+	}else if(!foundNode->r_empty && foundNode->r_data->key == data->key){
+		data->value = foundNode->r_data->value;
+	}
+	return data;
+}
+
+short putData(
+		B_tree * tree,
+		Data * data
+){
+	if(tree->size >= tree->max_size)
+		return 0;
 
 	// printf("insert -> %llu\n", data->key);
 	// search the right node;
 	NODE * foundNode = searchNode(tree->root, data);
 	NODE * newNode;
-	
+
+
+	// FIND the KEY !!!
 	if(!foundNode->l_empty && foundNode->l_data->key == data->key){
 		free(foundNode->l_data);
 		foundNode->l_data = data;
-		return;
+		return 1;
 	}else if(!foundNode->r_empty && foundNode->r_data->key == data->key){
 		free(foundNode->r_data);
 		foundNode->r_data = data;
-		return;
+		return 1;
 	}	
 	
 	
@@ -61,12 +76,15 @@ void insertNode(
 
 		newNode = _insertNode(foundNode, data);
 		if(newNode != NULL){
+			assert(!newNode->l_empty);
 			tree->root = newNode;	
 		}
 	}
 
-	tree->size += 1;
+	//put_bloom_filter(tree->bitArray	
 
+	tree->size += 1;
+	return 1;
 }
 
 NODE * searchNode(
@@ -289,21 +307,21 @@ NODE * _insertNode(
 
 
 void Breadth_first_search(B_tree * tree){
-	Data ** queue = (Data **)malloc(sizeof(Data *)*tree->size);
-	unsigned int tail_index = 1;
-	unsigned int head_index = 0;
+	// Data ** queue = (Data **)malloc(sizeof(Data *)*tree->size);
+	// unsigned int tail_index = 1;
+	// unsigned int head_index = 0;
 
-	Level ** levels = (Level **)malloc(sizeof(Level *) * 100);
-	levels[0] = createLevel(2, &queue[head_index]);
-	head_index += 2;
-	tail_index += 2;
+	// Level ** levels = (Level **)malloc(sizeof(Level *) * 100);
+	// levels[0] = createLevel(2, &queue[head_index]);
+	// head_index += 2;
+	// tail_index += 2;
 
-	// while(){
-	// 	if(queue[head_index]->
-	// 	++head;	
-	// }
+	// // while(){
+	// // 	if(queue[head_index]->
+	// // 	++head;	
+	// // }
 
-	free(queue);	
+	// free(queue);	
 }
 
 void Output(B_tree * tree){
@@ -316,9 +334,27 @@ void Output(B_tree * tree){
 void Depth_first_search(NODE * node, FILE * file){
 	if(node->l_empty) return;
 	if(node->left) Depth_first_search(node->left, file);	
-	fprintf(file, "%llu\n", node->l_data->key);
+	fprintf(file, "%llu %s\n", node->l_data->key, node->l_data->value);
 	if(node->mid) Depth_first_search(node->mid, file);
-	if(!node->r_empty) fprintf(file, "%llu\n", node->r_data->key);
+	if(!node->r_empty) fprintf(file, "%llu %s\n", node->r_data->key, node->r_data->value);
+	
 	if(node->right) Depth_first_search(node->right, file);
+}
+
+void Clear_tree(B_tree * tree){
+	Clear_children(tree->root);	
+	free(tree);
+}
+
+
+void Clear_children(NODE * node){
+	if (node->left) Clear_children(node->left);
+	if (node->mid) Clear_children(node->mid);
+	if (node->right) Clear_children(node->right);
+	if(!node->l_empty) free(node->l_data);	
+	if(!node->r_empty) free(node->r_data);
+	free(node);
+	return;
+
 }
 

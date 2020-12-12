@@ -8,7 +8,7 @@ Instruction * createInstruction(MODE mode, unsigned long long int key1, unsigned
 	data->mode = mode;
 	return data;
 }
-Data * createData(unsigned long long int key, char * value){
+Data * createData(unsigned long long int key, unsigned char * value){
 	Data * data = (Data *)malloc(sizeof(Data));
 	data->key = key;
 	data->value = value;

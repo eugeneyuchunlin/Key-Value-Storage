@@ -1,6 +1,7 @@
 #ifndef __B_TREE_H__
 #define __B_TREE_H__
 #include "data.h"
+#include "bloom_filter.h"
 #include <stdio.h>
 
 /** In this header file, I'd like to define the 2-3 B tree
@@ -28,23 +29,16 @@ typedef struct NODE  NODE;
 struct B_tree{
 	struct NODE * root;
 	unsigned int size;
+	unsigned int max_size;
+	unsigned int* bitArray;
 };
-
 typedef struct B_tree B_tree;
 
-struct Level{
-	struct Data ** datas;
-	unsigned int index;
-	unsigned int max;
-};
-
-typedef struct Level Level;
 
 NODE * createNode();
-B_tree * createTree();
-Level * createLevel(unsigned int, Data **);
+B_tree * createTree(unsigned int MAX_SIZE);
 
-void insertNode(
+short putData(
 		B_tree * tree,
 		Data * data
 );
@@ -59,9 +53,14 @@ NODE * searchNode(
 		Data * data
 );
 
+Data * getData(B_tree * tree, Data * );
+
 void Breadth_first_search(
 		B_tree * tree
 );
+
+void Clear_tree(B_tree * tree);
+void Clear_children(NODE* node);
 
 void Output(B_tree * tree);
 

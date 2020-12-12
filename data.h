@@ -20,12 +20,12 @@ typedef struct Instruction Instruction;
 
 struct Data{
 	unsigned long long int key;
-	char * value;
+	unsigned char * value;
 };
 
 typedef struct Data Data;
 
-Data * createData(unsigned long long int, char *);
+Data * createData(unsigned long long int,unsigned char *);
 
 // Instruction * createInstruction(MODE, unsigned long long int, unsigned long long int);
 

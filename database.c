@@ -1,16 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <assert.h>
-#include "data.h"
 #include "database.h"
-#include "bloom_filter.h"
 #include "btree.h"
+#include "data.h"
+#include "def.h"
 
-int main(int argc, const char * argv[]){
-	
-	// basicFunction((char*)argv[1]);
-	FILE * file = fopen(argv[1], "r");
+void basicFunction(char * file_name){
+	FILE * file = fopen(file_name, "r");
 	assert(file != NULL);
 	unsigned char c_mode[100];
 	unsigned long long int key1, key2;
@@ -41,26 +35,18 @@ int main(int argc, const char * argv[]){
 			fscanf(file, "%llu", &key1);
 			gData->key = key1;
 			gData = getData(tree, gData);
-			if(gData->value == NULL){
+			if(data->value == NULL){
 				printf("EMPTY\n");
 			}else{
-				printf("%s\n", gData->value);
+				printf("%s\n", data->value);
 			}
 			gData->value = NULL;
-		}else{ // SCAN
-			fscanf(file, "%llu %llu", &key1, &key2);
-			for(unsigned long long int i = key1; i <= key2; ++i){
-				gData->key = i;
-				gData = getData(tree, gData);
-				if(gData->value == NULL){
-					printf("EMPTY\n");
-				}else{
-					printf("%s\n", gData->value);
-				}
-				gData->value = NULL;
-			}
 		}
-	}	
-	Output(tree);
-	return 0;
+	}
+	
+}
+
+
+void outputTree(unsigned int number, B_tree * tree){
+
 }
