@@ -31,7 +31,7 @@ struct B_tree{
 	unsigned int size;
 	unsigned int number;
 	unsigned int max_size;
-	unsigned int* bitArray;
+	unsigned char* bitArray;
 	unsigned int bitArraySize;
 };
 typedef struct B_tree B_tree;

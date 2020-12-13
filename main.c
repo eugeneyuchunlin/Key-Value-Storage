@@ -57,7 +57,11 @@ int main(int argc, const char * argv[]){
 				// if memtable not found, use table cache
 				searchData(cache, sys, gData);	
 				if(gData->value == NULL)
-					printf("EMPTY\n");
+#ifdef DEBUG
+						printf("%llu EMPTY\n", gData->key);
+#else 
+						printf("EMPTY\n");
+#endif
 				else
 #ifdef DEBUG
 					printf("%llu %s\n",gData->key, gData->value);
@@ -83,7 +87,11 @@ int main(int argc, const char * argv[]){
 				if(gData->value == NULL){
 					searchData(cache, sys, gData);
 					if(gData->value == NULL)
+#ifdef DEBUG
+						printf("%llu EMPTY\n", gData->key);
+#else 
 						printf("EMPTY\n");
+#endif
 					else
 #ifdef DEBUG
 					printf("%llu %s\n",gData->key, gData->value);

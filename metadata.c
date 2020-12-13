@@ -41,9 +41,9 @@ MetaData * loadMetaData(char * filename){
 	fscanf(file, "%llu", &metadata->upper);
 	fscanf(file, "%u", &metadata->bitArraySize);
 	fscanf(file, "%u", &metadata->dataSize);
-	metadata->bitArray = (unsigned int *)malloc(sizeof(unsigned int)*metadata->bitArraySize);
+	metadata->bitArray = (unsigned char *)malloc(sizeof(unsigned char)*metadata->bitArraySize);
 	unsigned int index = 0;	
-	while(fscanf(file,"%u", &(metadata->bitArray[index])) != EOF) ++index;
+	while(fscanf(file,"%hhu", &(metadata->bitArray[index])) != EOF) ++index;
 	fclose(file);
 	metadata->data = NULL;
 	metadata->inCache = 0;
@@ -123,6 +123,31 @@ MetaData * loadTable(MetaData * metadata){
 	return metadata;
 }
 
+MetaData * loadTableAndSearch(MetaData * metadata, Data * data){
+	metadata->data = (Data **)malloc(sizeof(Data*) * metadata->dataSize);
+	metadata->accessTime = 0;
+	char file_name[100];
+	Data * temp;
+	sprintf(file_name, "./storage/%u.data", metadata->number);
+	FILE * file = fopen(file_name, "r");
+	assert(file != NULL);
+	unsigned long long int key;
+	char * value = (char *)malloc(sizeof(char)*129);
+	unsigned int i = 0;
+	// printf("Metadata NO.%d\n", metadata->number);
+	while(fscanf(file, "%llu %s", &key, value) != EOF){
+		temp =	createData(key, (unsigned char *)value);
+		metadata->data[i] = temp;
+		++i;
+		if(key == data->key)
+			data->value = (unsigned char*)value;
+		value = (char *)malloc(sizeof(char)*129);
+		
+	}
+	fclose(file);
+	return metadata;	
+}
+
 TableCache * createTableCache(unsigned int CACHE_CAPACITY){
 	TableCache * cache = (TableCache*)malloc(sizeof(TableCache));
 	cache->capacity = CACHE_CAPACITY;
@@ -131,8 +156,7 @@ TableCache * createTableCache(unsigned int CACHE_CAPACITY){
 	return cache;
 }
 
-void dropOutOfCache(MetaData * metadata){
-	// printf("data number = %d\ndata size = %d\n",metadata->number,  metadata->dataSize);
+void freeLoadedData(MetaData * metadata){
 	if(metadata && metadata->data){
 		for(unsigned int i = 0; i < metadata->dataSize; ++i){
 			// printf("i = %d\n", i);
@@ -140,10 +164,17 @@ void dropOutOfCache(MetaData * metadata){
 			free(metadata->data[i]);
 		}
 	}
+}
+
+void dropOutOfCache(MetaData * metadata){
+	// printf("data number = %d\ndata size = %d\n",metadata->number,  metadata->dataSize);
+	freeLoadedData(metadata);	
 	// metadata->data = NULL;
 	metadata->inCache = 0;
 	metadata->accessTime = 0;
 }
+
+
 
 int metaDataComp(const void *metadata1,const void *metadata2){
 	return ((MetaData *)metadata1)->number > ((MetaData*)metadata2)->number;
@@ -153,6 +184,7 @@ void addToCache(TableCache * cache, MetaData * metadata){
 	short minIndex = 0;
 	unsigned char min = 255;
 	metadata->inCache = 1;
+	metadata->accessTime >>= 1;
 	metadata->accessTime |= (1UL << 8);
 	
 	if(cache->size + 1 < cache->capacity){
@@ -165,45 +197,72 @@ void addToCache(TableCache * cache, MetaData * metadata){
 			}
 		}
 		dropOutOfCache(cache->rows[minIndex]);
-		// metadata = loadTable(metadata);
 		cache->rows[minIndex] = metadata;
 		
 	}
-	qsort(cache->rows, cache->size, sizeof(MetaData *), metaDataComp);
+	// qsort(cache->rows, cache->size, sizeof(MetaData *), metaDataComp);
 }
 
 Data * search(MetaData * metadata, Data * data){
 	// should perform binary search
-	for(unsigned int i = 0; i < metadata->dataSize; ++i){
-		if(metadata->data[i]->key ==  data->key){
-			data->value = metadata->data[i]->value;
-			return data;
-		}
-	}
+	binarySearch(metadata->data, 0, metadata->dataSize - 1, data);
+	
+	// for(unsigned int i = 0; i < metadata->dataSize; ++i){
+	// 	if(metadata->data[i]->key ==  data->key){
+	// 		data->value = metadata->data[i]->value;
+	// 		return data;
+	// 	}
+	// }
 	return data;
+}
+
+Data * binarySearch(Data ** dataArray,int start,int end, Data * target){
+	int index = end - start;
+	if(index < 0) 
+		return target;
+
+	index = start + (index >> 1);
+	if(dataArray[index]->key > target->key) // search left
+		return binarySearch(dataArray, start, index-1, target);
+	else if(dataArray[index]->key < target->key){
+		return binarySearch(dataArray, index + 1, end, target);
+	}else{
+		target->value = dataArray[index]->value;
+		return target;
+	}
 }
 
 Data * searchData(TableCache * cache, MetaDataSys * sys, Data *data){
 	// search Cache First!
-	// MetaData * founded = NULL;
 	//
 	// search sys
-	for(int i = sys->size - 1; i >= 0; --i){
+	int i;
+	MetaData * founded = NULL;
+	for(i = sys->size - 1; i >= 0; --i){
 		if(get_bloom_filter(sys->metadatas[i]->bitArray, data->key)){
-			// if(!sys->metadatas[i]->inCache)
-			sys->metadatas[i] = loadTable(sys->metadatas[i]);
-
-			search(sys->metadatas[i], data);
-			if(data->value){
-				// add to cache
-
-				// addToCache(cache, sys->metadatas[i]);
-				return data;
-			}else{
-				dropOutOfCache(sys->metadatas[i]);
+			if(!sys->metadatas[i]->inCache) // if not in cache, then perform load and search
+				sys->metadatas[i] = loadTableAndSearch(sys->metadatas[i], data);
+			else // else just perform search
+				search(sys->metadatas[i], data);
+			
+			if(data->value ){ // if get the result
+				if(!sys->metadatas[i]->inCache){ // if not in cache ===> add to cache
+					addToCache(cache, sys->metadatas[i]);
+					founded = sys->metadatas[i];
+				}else{
+					founded = sys->metadatas[i];
+				}
+				break;
+			}else{ // if result not founded 
+				if(!sys->metadatas[i]->inCache){ // if not in cache then just free the data
+					freeLoadedData(sys->metadatas[i]);	
+				}
 			}
 		}
 	}
+	
+
+
 	//
 	// for(unsigned int i = 0; i < cache->size; ++i){
 	// 	 if(get_bloom_filter(cache->rows[i]->bitArray, data->key)){
@@ -216,22 +275,13 @@ Data * searchData(TableCache * cache, MetaDataSys * sys, Data *data){
 	// }	
 	
 	// update access time
-	// if(founded == NULL){
-	// 	for(unsigned int i = 0; i < cache->size; ++i){
-	// 		cache->rows[i]->accessTime = cache->rows[i]->accessTime >> 1;
-	// 		// cache->rows[i]->accessTime |= (1UL<<8);
-	// 	}	
-	// }else{
-	// 	for(unsigned int i = 0; i < cache->size; ++i){
-	// 		if(founded != cache->rows[i]){
-	// 			cache->rows[i]->accessTime = cache->rows[i]->accessTime >> 1;	
-	// 		}
-	// 	}
-	// 	return data; // search in the cache
-	// }	
-	
-	
-
+	if(founded != NULL){ // if founded
+		for(unsigned int i = 0; i < cache->size; ++i){
+			if(cache->rows[i] != founded){
+				cache->rows[i]->accessTime >>= 1;
+			}
+		}
+	}	
 	
 
 	return data;

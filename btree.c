@@ -21,7 +21,7 @@ B_tree * createTree(unsigned int MAX_SIZE, unsigned int number){
 	MAX_SIZE = (MAX_SIZE >> 3) + 1;
 	tree->bitArraySize = MAX_SIZE;
 
-	tree->bitArray = (unsigned int*)calloc(MAX_SIZE, sizeof(unsigned int));
+	tree->bitArray = (unsigned char*)calloc(MAX_SIZE, sizeof(unsigned char));
 	return tree;
 }
 

@@ -5,7 +5,7 @@
 
 
 struct MetaData{
-	unsigned int *bitArray; // for bloom filter
+	unsigned char *bitArray; // for bloom filter
 	unsigned long long int lower;
 	unsigned long long int upper;
 	unsigned int number;
@@ -46,6 +46,6 @@ int metaDataComp(const void *,const void *);
 void addToCache(TableCache *, MetaData*);
 Data * search(MetaData *, Data *);
 Data * searchData(TableCache *, MetaDataSys *, Data *);
-
+Data * binarySearch(Data **,int,int, Data *);
 
 #endif

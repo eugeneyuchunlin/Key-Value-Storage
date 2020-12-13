@@ -32,14 +32,14 @@ unsigned long lose_lose_hash(unsigned char *str){
 	return hash % MAX_PRIME_VALUE;
 }
 
-void set_bit(unsigned int index, unsigned int * bitArray){
+void set_bit(unsigned int index, unsigned char * bitArray){
 	unsigned int whichInt, whichBit;
 	whichInt = index >> 3;
 	whichBit = index - (whichInt << 3);
 	bitArray[whichInt] |= (1UL << whichBit);
 }
 
-unsigned int check_bit(unsigned int index, unsigned int * bitArray){
+unsigned int check_bit(unsigned int index, unsigned char * bitArray){
 	unsigned int whichInt, whichBit, testValue;
 	whichInt = index >> 3;
 	whichBit = index - (whichInt << 3);
@@ -52,7 +52,7 @@ unsigned long knuth_hash(unsigned long long int number){
 	return number * 2654435761 % MAX_PRIME_VALUE;
 }
 
-void put_bloom_filter(unsigned int * bitArray, unsigned long long int key){
+void put_bloom_filter(unsigned char * bitArray, unsigned long long int key){
 	set_bit(knuth_hash(key), bitArray);
 	unsigned char key_c_str[50];
 	sprintf((char*)key_c_str, "%llu", key);
@@ -60,7 +60,7 @@ void put_bloom_filter(unsigned int * bitArray, unsigned long long int key){
 	set_bit(lose_lose_hash(key_c_str), bitArray);
 }
 
-short get_bloom_filter(unsigned int * bitArray, unsigned long long int key){
+short get_bloom_filter(unsigned char * bitArray, unsigned long long int key){
 	unsigned char key_c_str[50];
 	sprintf((char *)key_c_str, "%llu", key);
 	return (check_bit(knuth_hash(key), bitArray) && check_bit(sdbm_hash(key_c_str), bitArray) && check_bit(lose_lose_hash(key_c_str), bitArray));
