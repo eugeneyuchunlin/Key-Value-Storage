@@ -15,6 +15,11 @@ Data * createData(unsigned long long int key, unsigned char * value){
 	return data;
 }
 
+void freeData(Data *data){
+	free(data->value);
+	free(data);
+}
+
 /*
 Instruction * createInstruction(MODE mode, unsigned long long int key1, char * value){
 	Instruction * data = (Instruction *)malloc(sizeof(Instruction));

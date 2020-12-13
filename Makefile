@@ -25,7 +25,7 @@ verify: verify.cpp
 	g++ --std=c++11 -o verify verify.cpp
 
 clear:
-	rm *.o
 	rm -r storage
 	mkdir -p storage
 	rm db.info
+	rm *.o

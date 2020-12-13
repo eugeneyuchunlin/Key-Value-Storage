@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <string.h>
 #include "data.h"
 // #include "database.h"
 #include "bloom_filter.h"
@@ -10,6 +11,40 @@
 #include "metadata.h"
 
 // #define DEBUG
+
+
+char * outputFileName(const char * inputfileName){
+	// find .
+	unsigned int i, index;
+	index = 0;
+	char * outputname = (char *)malloc(sizeof(char)*(strlen(inputfileName)+2));
+	
+	char * suffix;
+	for(i = strlen(inputfileName) - 1; i >= 0; --i){
+		if(inputfileName[i] == '/'){
+			index = i;
+			break;
+		}
+	}
+
+	suffix = (char *)inputfileName + index + 1;
+	index = 0;	
+
+
+	for(i = 0; i < strlen(suffix); ++i){
+		if(suffix[i] == '.'){
+			index = i;
+			break;
+		}
+	}
+
+	if(index == 0)
+		return NULL;
+	strcpy(outputname, suffix);
+	strcpy(outputname+index+1, "output");
+
+	return outputname;
+}
 
 int main(int argc, const char * argv[]){
 	
@@ -21,7 +56,9 @@ int main(int argc, const char * argv[]){
 	// basicFunction((char*)argv[1]);
 	FILE * file = fopen(argv[1], "r");
 	assert(file != NULL);
-	FILE * outputFIle = fopen("result.out", "w");
+	char * output_file_name = outputFileName(argv[1]);
+	FILE * outputFIle = fopen(output_file_name, "w");
+	FILE * log = fopen("./storage/db.log", "a+");
 
 	unsigned char c_mode[100];
 	unsigned long long int key1, key2;
@@ -37,11 +74,13 @@ int main(int argc, const char * argv[]){
 	unsigned int dataAmount = 0;
 
 	while(fscanf(file, "%s", c_mode) != EOF){
-
 		if(c_mode[0] == 'P'){ // PUT
 			fscanf(file, "%llu", &key1);
 			value = (unsigned char *)malloc(sizeof(char)*129); 
 			fscanf(file, "%s", value);
+			fprintf(log, "%llu %s\n", key1, value);
+			// free(value);
+			// continue;
 			data = createData(key1, value);
 			if(!putData(tree, data)){
 				// printf("OUTPUT\n");
@@ -51,6 +90,7 @@ int main(int argc, const char * argv[]){
 			}
 			++dataAmount;
 		}else if(c_mode[0] == 'G'){ // GET
+			// continue;
 			fscanf(file, "%llu", &key1);
 			gData->key = key1;
 			gData->value = NULL;
@@ -80,7 +120,7 @@ int main(int argc, const char * argv[]){
 			}
 			gData->value = NULL;
 		}else{ // SCAN
-			
+			// continue;	
 			fscanf(file, "%llu %llu", &key1, &key2);
 			// printf("SCAN !!!from %llu to %llu\n\n", key1, key2);
 			for(unsigned long long int i = key1; i <= key2; ++i){

@@ -26,6 +26,7 @@ struct Data{
 typedef struct Data Data;
 
 Data * createData(unsigned long long int,unsigned char *);
+void freeData(Data *);
 
 // Instruction * createInstruction(MODE, unsigned long long int, unsigned long long int);
 

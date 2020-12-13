@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "bloom_filter.h"
 #include "btree.h"
+#include "data.h"
 
 NODE * createNode(){
 	NODE * node = (NODE *)malloc(sizeof(NODE));
@@ -357,8 +358,8 @@ void Clear_children(NODE * node){
 	if (node->left) Clear_children(node->left);
 	if (node->mid) Clear_children(node->mid);
 	if (node->right) Clear_children(node->right);
-	if(!node->l_empty) free(node->l_data);	
-	if(!node->r_empty) free(node->r_data);
+	if(!node->l_empty) freeData(node->l_data);
+	if(!node->r_empty) freeData(node->r_data);
 	free(node);
 	return;
 

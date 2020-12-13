@@ -119,6 +119,7 @@ MetaData * loadTable(MetaData * metadata){
 		++i;
 		value = (char *)malloc(sizeof(char)*129);
 	}
+	free(value);
 	fclose(file);
 	return metadata;
 }
@@ -142,8 +143,8 @@ MetaData * loadTableAndSearch(MetaData * metadata, Data * data){
 		if(key == data->key)
 			data->value = (unsigned char*)value;
 		value = (char *)malloc(sizeof(char)*129);
-		
 	}
+	free(value);
 	fclose(file);
 	return metadata;	
 }
@@ -160,9 +161,10 @@ void freeLoadedData(MetaData * metadata){
 	if(metadata && metadata->data){
 		for(unsigned int i = 0; i < metadata->dataSize; ++i){
 			// printf("i = %d\n", i);
-			free(metadata->data[i]->value);
-			free(metadata->data[i]);
+			// free(metadata->data[i]->value);
+			freeData(metadata->data[i]);
 		}
+		free(metadata->data);
 	}
 }
 
