@@ -2,6 +2,7 @@ GCC := gcc --std=c99 -g
 
 all: bloom_filter.o main.o btree.o data.o metadata.o
 	$(GCC) -o main main.o bloom_filter.o btree.o data.o metadata.o
+	mkdir storage
 
 bloom_filter.o : bloom_filter.c bloom_filter.h
 	$(GCC) -c bloom_filter.c
@@ -26,6 +27,6 @@ verify: verify.cpp
 
 clear:
 	rm -r storage
-	mkdir -p storage
+	# mkdir -p storage
 	rm db.info
 	rm *.o

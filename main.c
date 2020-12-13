@@ -54,6 +54,7 @@ int main(int argc, const char * argv[]){
 	// printf("check result = %d\n", get_bloom_filter(tree->bitArray, 5));
 
 	// basicFunction((char*)argv[1]);
+	clock_t start = clock();
 	FILE * file = fopen(argv[1], "r");
 	assert(file != NULL);
 	char * output_file_name = outputFileName(argv[1]);
@@ -157,6 +158,7 @@ int main(int argc, const char * argv[]){
 	// Depth_first_search(tree->root, file);
 	outputTree(sys, tree);
 	outputMetaDataSys(sys);
+	printf("Time elapse = %.3fs\n", (double)(clock() - start) / (double)(CLOCKS_PER_SEC));
 	// outputTree(
 	// Output(tree);
 	return 0;
