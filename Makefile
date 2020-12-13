@@ -26,6 +26,6 @@ verify: verify.cpp
 
 clear:
 	rm *.o
-	rm db.info
 	rm -r storage
 	mkdir -p storage
+	rm db.info

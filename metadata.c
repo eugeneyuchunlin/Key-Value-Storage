@@ -107,16 +107,19 @@ MetaData * loadTable(MetaData * metadata){
 	char file_name[100];
 	Data * temp;
 	sprintf(file_name, "./storage/%u.data", metadata->number);
-	FILE * file = fopen(file_name, "r");	
+	FILE * file = fopen(file_name, "r");
+	assert(file != NULL);
 	unsigned long long int key;
 	char * value = (char *)malloc(sizeof(char)*129);
 	unsigned int i = 0;
+	// printf("Metadata NO.%d\n", metadata->number);
 	while(fscanf(file, "%llu %s", &key, value) != EOF){
 		temp =	createData(key, (unsigned char *)value);
 		metadata->data[i] = temp;
 		++i;
 		value = (char *)malloc(sizeof(char)*129);
 	}
+	fclose(file);
 	return metadata;
 }
 
@@ -129,12 +132,15 @@ TableCache * createTableCache(unsigned int CACHE_CAPACITY){
 }
 
 void dropOutOfCache(MetaData * metadata){
+	// printf("data number = %d\ndata size = %d\n",metadata->number,  metadata->dataSize);
 	if(metadata && metadata->data){
 		for(unsigned int i = 0; i < metadata->dataSize; ++i){
+			// printf("i = %d\n", i);
 			free(metadata->data[i]->value);
 			free(metadata->data[i]);
 		}
 	}
+	// metadata->data = NULL;
 	metadata->inCache = 0;
 	metadata->accessTime = 0;
 }
@@ -171,6 +177,7 @@ Data * search(MetaData * metadata, Data * data){
 	for(unsigned int i = 0; i < metadata->dataSize; ++i){
 		if(metadata->data[i]->key ==  data->key){
 			data->value = metadata->data[i]->value;
+			return data;
 		}
 	}
 	return data;
@@ -178,49 +185,54 @@ Data * search(MetaData * metadata, Data * data){
 
 Data * searchData(TableCache * cache, MetaDataSys * sys, Data *data){
 	// search Cache First!
-	MetaData * founded = NULL;
-	for(unsigned int i = 0; i < cache->size; ++i){
-		// if(get_bloom_filter(cache->rows[i]->bitArray, data->key)){
-			search(cache->rows[i], data);
-			if(data->value){
-				founded = cache->rows[i];
-				break;
-			}
-	// 	}
-	}	
-	
-	// update access time
-	if(founded == NULL){
-		for(unsigned int i = 0; i < cache->size; ++i){
-			cache->rows[i]->accessTime = cache->rows[i]->accessTime >> 1;
-			// cache->rows[i]->accessTime |= (1UL<<8);
-		}	
-	}else{
-		for(unsigned int i = 0; i < cache->size; ++i){
-			if(founded != cache->rows[i]){
-				cache->rows[i]->accessTime = cache->rows[i]->accessTime >> 1;	
-			}
-		}
-		return data; // search in the cache
-	}	
-	
-	
-
+	// MetaData * founded = NULL;
+	//
 	// search sys
 	for(int i = sys->size - 1; i >= 0; --i){
-		
-		if(sys->metadatas[i]->inCache == 0 /*&& get_bloom_filter(sys->metadatas[i]->bitArray, data->key)*/){
+		if(get_bloom_filter(sys->metadatas[i]->bitArray, data->key)){
+			// if(!sys->metadatas[i]->inCache)
 			sys->metadatas[i] = loadTable(sys->metadatas[i]);
+
 			search(sys->metadatas[i], data);
 			if(data->value){
 				// add to cache
-				addToCache(cache, sys->metadatas[i]);
+
+				// addToCache(cache, sys->metadatas[i]);
 				return data;
 			}else{
 				dropOutOfCache(sys->metadatas[i]);
 			}
 		}
 	}
+	//
+	// for(unsigned int i = 0; i < cache->size; ++i){
+	// 	 if(get_bloom_filter(cache->rows[i]->bitArray, data->key)){
+	// 		search(cache->rows[i], data);
+	// 		if(data->value){
+	// 			founded = cache->rows[i];
+	// 			break;
+	// 		}
+	//  	}
+	// }	
+	
+	// update access time
+	// if(founded == NULL){
+	// 	for(unsigned int i = 0; i < cache->size; ++i){
+	// 		cache->rows[i]->accessTime = cache->rows[i]->accessTime >> 1;
+	// 		// cache->rows[i]->accessTime |= (1UL<<8);
+	// 	}	
+	// }else{
+	// 	for(unsigned int i = 0; i < cache->size; ++i){
+	// 		if(founded != cache->rows[i]){
+	// 			cache->rows[i]->accessTime = cache->rows[i]->accessTime >> 1;	
+	// 		}
+	// 	}
+	// 	return data; // search in the cache
+	// }	
+	
+	
+
+	
 
 	return data;
 }

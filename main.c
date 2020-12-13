@@ -9,6 +9,8 @@
 #include "def.h"
 #include "metadata.h"
 
+// #define DEBUG
+
 int main(int argc, const char * argv[]){
 	
 	// B_tree * tree = createTree(MAX_TREE_SIZE);
@@ -40,7 +42,7 @@ int main(int argc, const char * argv[]){
 			fscanf(file, "%s", value);
 			data = createData(key1, value);
 			if(!putData(tree, data)){
-				printf("OUTPUT\n");
+				// printf("OUTPUT\n");
 				outputTree(sys, tree);
 				tree = createTree(MAX_TREE_SIZE, sys->size);
 				putData(tree, data);
@@ -57,30 +59,54 @@ int main(int argc, const char * argv[]){
 				if(gData->value == NULL)
 					printf("EMPTY\n");
 				else
+#ifdef DEBUG
+					printf("%llu %s\n",gData->key, gData->value);
+#else
 					printf("%s\n", gData->value);
+#endif
 			}else{
-				printf("%s\n", gData->value);
+#ifdef DEBUG
+					printf("%llu %s\n",gData->key, gData->value);
+#else
+					printf("%s\n", gData->value);
+#endif
+
 			}
 			gData->value = NULL;
 		}else{ // SCAN
+			
 			fscanf(file, "%llu %llu", &key1, &key2);
+			// printf("SCAN !!!from %llu to %llu\n\n", key1, key2);
 			for(unsigned long long int i = key1; i <= key2; ++i){
 				gData->key = i;
 				gData = getData(tree, gData);
 				if(gData->value == NULL){
-					printf("EMPTY\n");
-				}else{
+					searchData(cache, sys, gData);
+					if(gData->value == NULL)
+						printf("EMPTY\n");
+					else
+#ifdef DEBUG
+					printf("%llu %s\n",gData->key, gData->value);
+#else
 					printf("%s\n", gData->value);
+#endif
+
+				}else{
+#ifdef DEBUG
+					printf("%llu %s\n",gData->key, gData->value);
+#else
+					printf("%s\n", gData->value);
+#endif
 				}
 				gData->value = NULL;
 			}
 		}
 	}
-	printf("%s\n", tree->root->mid->left->l_data->value);
-	file = fopen("tmp", "w");
-	Depth_first_search(tree->root, file);
-	// outputTree(sys, tree);
-	// outputMetaDataSys(sys);
+	// printf("%s\n", tree->root->mid->left->l_data->value);
+	// file = fopen("tmp", "w");
+	// Depth_first_search(tree->root, file);
+	outputTree(sys, tree);
+	outputMetaDataSys(sys);
 	// outputTree(
 	// Output(tree);
 	return 0;
