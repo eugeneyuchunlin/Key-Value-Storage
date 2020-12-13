@@ -21,6 +21,8 @@ int main(int argc, const char * argv[]){
 	// basicFunction((char*)argv[1]);
 	FILE * file = fopen(argv[1], "r");
 	assert(file != NULL);
+	FILE * outputFIle = fopen("result.out", "w");
+
 	unsigned char c_mode[100];
 	unsigned long long int key1, key2;
 	unsigned char * value = (unsigned char *)malloc(sizeof(unsigned char)*129);
@@ -60,19 +62,19 @@ int main(int argc, const char * argv[]){
 #ifdef DEBUG
 						printf("%llu EMPTY\n", gData->key);
 #else 
-						printf("EMPTY\n");
+						fprintf(outputFIle, "EMPTY\n");
 #endif
 				else
 #ifdef DEBUG
 					printf("%llu %s\n",gData->key, gData->value);
 #else
-					printf("%s\n", gData->value);
+					fprintf(outputFIle, "%s\n", gData->value);
 #endif
 			}else{
 #ifdef DEBUG
 					printf("%llu %s\n",gData->key, gData->value);
 #else
-					printf("%s\n", gData->value);
+					fprintf(outputFIle, "%s\n", gData->value);
 #endif
 
 			}
@@ -90,20 +92,20 @@ int main(int argc, const char * argv[]){
 #ifdef DEBUG
 						printf("%llu EMPTY\n", gData->key);
 #else 
-						printf("EMPTY\n");
+						fprintf(outputFIle, "EMPTY\n");
 #endif
 					else
 #ifdef DEBUG
 					printf("%llu %s\n",gData->key, gData->value);
 #else
-					printf("%s\n", gData->value);
+					fprintf(outputFIle, "%s\n", gData->value);
 #endif
 
 				}else{
 #ifdef DEBUG
 					printf("%llu %s\n",gData->key, gData->value);
 #else
-					printf("%s\n", gData->value);
+					fprintf(outputFIle, "%s\n", gData->value);
 #endif
 				}
 				gData->value = NULL;
