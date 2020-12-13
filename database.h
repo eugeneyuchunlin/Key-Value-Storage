@@ -8,6 +8,4 @@
 
 void basicFunction(char * file_name);
 
-void outputTree(unsigned int number, B_tree * tree);
-
 #endif

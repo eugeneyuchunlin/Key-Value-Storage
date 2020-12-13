@@ -4,3 +4,5 @@ verify
 *.input
 *.output
 *.out
+*.txt
+storage/

@@ -9,9 +9,12 @@ unsigned long sdbm_hash(unsigned char *str);
 
 unsigned long lose_lose_hash(unsigned char * str);
 
+unsigned long knuth_hash(unsigned long long int number);
+
 void set_bit(unsigned int index, unsigned int * bitArray);
 
-void put_bloom_filter(unsigned int * bitArray, unsigned char * str);
-    
+void put_bloom_filter(unsigned int * bitArray, unsigned long long int key);
+
+short get_bloom_filter(unsigned int * bitArray, unsigned long long int key);
 
 #endif

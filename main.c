@@ -3,21 +3,30 @@
 #include <time.h>
 #include <assert.h>
 #include "data.h"
-#include "database.h"
+// #include "database.h"
 #include "bloom_filter.h"
 #include "btree.h"
+#include "def.h"
+#include "metadata.h"
 
 int main(int argc, const char * argv[]){
 	
+	// B_tree * tree = createTree(MAX_TREE_SIZE);
+	// putData(tree, createData(1, (unsigned char *)"apple"));
+	// putData(tree, createData(5, NULL));
+	// printf("check result = %d\n", get_bloom_filter(tree->bitArray, 5));
+
 	// basicFunction((char*)argv[1]);
 	FILE * file = fopen(argv[1], "r");
 	assert(file != NULL);
 	unsigned char c_mode[100];
 	unsigned long long int key1, key2;
-	unsigned char * value = (unsigned char *)malloc(sizeof(char)*129);
+	unsigned char * value = (unsigned char *)malloc(sizeof(unsigned char)*129);
 	Data *data;
+	MetaDataSys * sys = createMetaDataSys();
+	TableCache * cache = createTableCache(8);
 
-	B_tree * tree = createTree(MAX_TREE_SIZE);
+	B_tree * tree = createTree(MAX_TREE_SIZE, sys->size);
 	
 	Data * gData = createData(0, NULL);
 	
@@ -32,17 +41,23 @@ int main(int argc, const char * argv[]){
 			data = createData(key1, value);
 			if(!putData(tree, data)){
 				printf("OUTPUT\n");
-				outputTree(0, tree); // should pass for metadata engin
-				tree = createTree(MAX_TREE_SIZE);
+				outputTree(sys, tree);
+				tree = createTree(MAX_TREE_SIZE, sys->size);
 				putData(tree, data);
 			}
 			++dataAmount;
 		}else if(c_mode[0] == 'G'){ // GET
 			fscanf(file, "%llu", &key1);
 			gData->key = key1;
+			gData->value = NULL;
 			gData = getData(tree, gData);
 			if(gData->value == NULL){
-				printf("EMPTY\n");
+				// if memtable not found, use table cache
+				searchData(cache, sys, gData);	
+				if(gData->value == NULL)
+					printf("EMPTY\n");
+				else
+					printf("%s\n", gData->value);
 			}else{
 				printf("%s\n", gData->value);
 			}
@@ -60,7 +75,13 @@ int main(int argc, const char * argv[]){
 				gData->value = NULL;
 			}
 		}
-	}	
-	Output(tree);
+	}
+	printf("%s\n", tree->root->mid->left->l_data->value);
+	file = fopen("tmp", "w");
+	Depth_first_search(tree->root, file);
+	// outputTree(sys, tree);
+	// outputMetaDataSys(sys);
+	// outputTree(
+	// Output(tree);
 	return 0;
 }

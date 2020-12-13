@@ -12,13 +12,16 @@ NODE * createNode(){
 	return node;
 }
 
-B_tree * createTree(unsigned int MAX_SIZE){
+B_tree * createTree(unsigned int MAX_SIZE, unsigned int number){
 	B_tree* tree = (B_tree *)malloc(sizeof(B_tree));
 	tree->root = createNode();
 	tree->size = 0;
+	tree->number = number;
 	tree->max_size = MAX_SIZE;
-	MAX_SIZE = MAX_SIZE >> 3;
-	tree->bitArray = (unsigned int*)malloc(sizeof(unsigned int)*MAX_SIZE);
+	MAX_SIZE = (MAX_SIZE >> 3) + 1;
+	tree->bitArraySize = MAX_SIZE;
+
+	tree->bitArray = (unsigned int*)calloc(MAX_SIZE, sizeof(unsigned int));
 	return tree;
 }
 
@@ -27,6 +30,9 @@ Data * getData(
 		B_tree * tree,
 		Data * data
 ){
+	if(!get_bloom_filter(tree->bitArray, data->key))
+		return data;
+
 	NODE * foundNode = searchNode(tree->root, data);
 	
 	if(!foundNode->l_empty && foundNode->l_data->key == data->key){
@@ -81,7 +87,7 @@ short putData(
 		}
 	}
 
-	//put_bloom_filter(tree->bitArray	
+	put_bloom_filter(tree->bitArray, data->key);
 
 	tree->size += 1;
 	return 1;
@@ -324,9 +330,9 @@ void Breadth_first_search(B_tree * tree){
 	// free(queue);	
 }
 
-void Output(B_tree * tree){
-	FILE * file;
-	file = fopen("test.txt", "w");
+void Output(B_tree * tree, FILE * file){
+	// FILE * file;
+	// file = fopen("test.txt", "w");
 	Depth_first_search(tree->root, file);	
 }
 
