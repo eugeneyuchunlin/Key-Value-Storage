@@ -156,7 +156,9 @@ int main(int argc, const char * argv[]){
 	// printf("%s\n", tree->root->mid->left->l_data->value);
 	// file = fopen("tmp", "w");
 	// Depth_first_search(tree->root, file);
+	//
 	outputTree(cache, sys, tree);
+	Compaction(sys, sys->size, 50, 1);
 	outputMetaDataSys(sys);
 	printf("Time elapse = %.3fs\n", (double)(clock() - start) / (double)(CLOCKS_PER_SEC));
 	// outputTree(
