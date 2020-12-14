@@ -3,6 +3,6 @@
 
 #define MAX_TREE_SIZE 100000
 #define MAX_PRIME_VALUE 100003
-#define CACHE_SIZE 1024
+#define CACHE_SIZE 128
 
 #endif

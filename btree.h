@@ -64,9 +64,9 @@ void Breadth_first_search(
 void Clear_tree(B_tree * tree);
 void Clear_children(NODE* node);
 
-void Output(B_tree * tree, FILE * file);
+void Output(B_tree * tree, FILE * file, Data ** collectedData, unsigned int*size);
 
-void Depth_first_search(NODE * node, FILE *);
+void Depth_first_search(NODE * node, FILE *, Data ** collectedData, unsigned int *size);
 
 void Test_parent_relationship(NODE *root);
 

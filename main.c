@@ -85,7 +85,7 @@ int main(int argc, const char * argv[]){
 			data = createData(key1, value);
 			if(!putData(tree, data)){
 				// printf("OUTPUT\n");
-				outputTree(sys, tree);
+				outputTree(cache, sys, tree);
 				tree = createTree(MAX_TREE_SIZE, sys->size);
 				putData(tree, data);
 			}
@@ -156,7 +156,7 @@ int main(int argc, const char * argv[]){
 	// printf("%s\n", tree->root->mid->left->l_data->value);
 	// file = fopen("tmp", "w");
 	// Depth_first_search(tree->root, file);
-	outputTree(sys, tree);
+	outputTree(cache, sys, tree);
 	outputMetaDataSys(sys);
 	printf("Time elapse = %.3fs\n", (double)(clock() - start) / (double)(CLOCKS_PER_SEC));
 	// outputTree(

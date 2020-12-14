@@ -6,19 +6,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-MetaData * createMetaData(unsigned int number, B_tree * tree){
+MetaData * createMetaData(TableCache * cache, unsigned int number, B_tree * tree){
 	MetaData * metadata = (MetaData *)malloc(sizeof(MetaData));
 	metadata->inCache = 0;
 	metadata->number = number;
 	metadata->dataSize = tree->size;
 	metadata->lower = metadata->upper = 0;
 	metadata->bitArray = tree->bitArray;
-	metadata->data = NULL;
+	metadata->data = (Data **)malloc(sizeof(Data*)*tree->size);
 	metadata->bitArraySize = tree->bitArraySize;	
 	char file_name[100];
 	sprintf(file_name, "./storage/%u.data", number);
 	FILE * file = fopen(file_name, "w");
-	Output(tree, file);
+	
+
+	unsigned int index = 0;
+	Output(tree, file, metadata->data, &index);
+	addToCache(cache, metadata);	
+
 	fclose(file);
 	sprintf(file_name, "./storage/%u.meta", number);		
 	file = fopen(file_name, "w");
@@ -88,8 +93,8 @@ void outputMetaDataSys(MetaDataSys * sys){
 	fclose(file);
 }
 
-short outputTree(MetaDataSys * sys, B_tree * tree){
-	MetaData * metadata = createMetaData(tree->number, tree);
+short outputTree(TableCache * cache, MetaDataSys * sys, B_tree * tree){
+	MetaData * metadata = createMetaData(cache, tree->number, tree);
 	if(sys->size + 1 > sys->capacity){
 		sys->metadatas = (MetaData **)realloc(sys->metadatas, sizeof(MetaData*) *  (sys->capacity + 100));
 		sys->capacity += 100;

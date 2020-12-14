@@ -331,21 +331,27 @@ void Breadth_first_search(B_tree * tree){
 	// free(queue);	
 }
 
-void Output(B_tree * tree, FILE * file){
+void Output(B_tree * tree, FILE * file, Data ** collectedData, unsigned int *size){
 	// FILE * file;
 	// file = fopen("test.txt", "w");
-	Depth_first_search(tree->root, file);	
+	Depth_first_search(tree->root, file, collectedData, size);	
 }
 
 
-void Depth_first_search(NODE * node, FILE * file){
+void Depth_first_search(NODE * node, FILE * file, Data **collectedData, unsigned int *size){
 	if(node->l_empty) return;
-	if(node->left) Depth_first_search(node->left, file);	
+	if(node->left) Depth_first_search(node->left, file, collectedData, size);	
 	fprintf(file, "%llu %s\n", node->l_data->key, node->l_data->value);
-	if(node->mid) Depth_first_search(node->mid, file);
-	if(!node->r_empty) fprintf(file, "%llu %s\n", node->r_data->key, node->r_data->value);
+	collectedData[*size] = node->l_data;
+	*size = *size + 1;
+	if(node->mid) Depth_first_search(node->mid, file, collectedData, size);
+	if(!node->r_empty) {
+		fprintf(file, "%llu %s\n", node->r_data->key, node->r_data->value);
+		collectedData[*size] = node->r_data;
+		*size = *size +1;
+	}
 	
-	if(node->right) Depth_first_search(node->right, file);
+	if(node->right) Depth_first_search(node->right, file, collectedData, size);
 }
 
 void Clear_tree(B_tree * tree){
@@ -358,8 +364,8 @@ void Clear_children(NODE * node){
 	if (node->left) Clear_children(node->left);
 	if (node->mid) Clear_children(node->mid);
 	if (node->right) Clear_children(node->right);
-	if(!node->l_empty) freeData(node->l_data);
-	if(!node->r_empty) freeData(node->r_data);
+	// if(!node->l_empty) freeData(node->l_data);
+	// if(!node->r_empty) freeData(node->r_data);
 	free(node);
 	return;
 

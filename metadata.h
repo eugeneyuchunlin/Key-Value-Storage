@@ -36,11 +36,11 @@ typedef struct TableCache TableCache;
 
 MetaData * loadTable(MetaData * metadata);
 TableCache * createTableCache(unsigned int CACHE_CAPACITY);
-MetaData * createMetaData(unsigned int number, B_tree * tree);
+MetaData * createMetaData(TableCache *, unsigned int number, B_tree * tree);
 MetaDataSys * createMetaDataSys();
 void addToCache(TableCache * cache, MetaData * metadata);
 void outputMetaDataSys(MetaDataSys * sys);
-short outputTree(MetaDataSys * sys, B_tree * tree);
+short outputTree(TableCache * cache, MetaDataSys * sys, B_tree * tree);
 void dropOutOfCache(MetaData * metadata);
 int metaDataComp(const void *,const void *);
 void addToCache(TableCache *, MetaData*);

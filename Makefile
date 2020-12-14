@@ -1,4 +1,4 @@
-GCC := gcc --std=c99 -g
+GCC := gcc --std=c99 -g -O3
 
 all: bloom_filter.o main.o btree.o data.o metadata.o
 	$(GCC) -o main main.o bloom_filter.o btree.o data.o metadata.o
