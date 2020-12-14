@@ -66,7 +66,7 @@ int main(int argc, const char * argv[]){
 	unsigned char * value = (unsigned char *)malloc(sizeof(unsigned char)*129);
 	Data *data;
 	MetaDataSys * sys = createMetaDataSys();
-	TableCache * cache = createTableCache(8);
+	TableCache * cache = createTableCache(CACHE_SIZE);
 
 	B_tree * tree = createTree(MAX_TREE_SIZE, sys->size);
 	

@@ -61,8 +61,8 @@ MetaDataSys * createMetaDataSys(){
 
 	if(file == NULL){
 		// a new db.info
-		sys->metadatas = (MetaData **)malloc(sizeof(MetaData*) * 100);
-		sys->capacity = 100;
+		sys->capacity = 3; // default capacity;
+		sys->metadatas = (MetaData **)malloc(sizeof(MetaData*) * sys->capacity);
 		sys->size = 0;
 		return sys;
 	}else{
